@@ -116,7 +116,7 @@ function rmd160(uint8_array, state) {
                 return new Array(size);
             }
         },
-        update : function (state, data) {
+        progress : function (state, data) {
             if (state.finalized) throw new Error('Digest already called');
 
             // consume data
@@ -128,7 +128,7 @@ function rmd160(uint8_array, state) {
                     block[i++] = data[offset++];
                 }
 
-                fun._update(state);
+                fun.update(state);
                 state.blockOffset = 0;
             }
 
@@ -148,7 +148,7 @@ function rmd160(uint8_array, state) {
 
             return state;
         },
-        _update : function (state) {
+        update : function (state) {
             const words = ARRAY16;
 
             for (let j = 0; j < 16; ++j) {
@@ -249,14 +249,14 @@ function rmd160(uint8_array, state) {
 
             if (state.blockOffset > 56) {
                 state.block.fill(0, state.blockOffset, 64);
-                fun._update(state);
+                fun.update(state);
                 state.blockOffset = 0;
             }
 
             state.block.fill(0, state.blockOffset, 56);
             fun.writeUInt32LE(state.block, state.len[0], 56);
             fun.writeUInt32LE(state.block, state.len[1], 60);
-            fun._update(state);
+            fun.update(state);
 
             // produce result
             const buffer = fun.createU8Array(20);
@@ -338,7 +338,7 @@ function rmd160(uint8_array, state) {
 
         if (uint8_array === null) return state;
 
-        fun.update(state, uint8_array);
+        fun.progress(state, uint8_array);
         return fun.digest(state);
     }
 
@@ -346,7 +346,7 @@ function rmd160(uint8_array, state) {
         return fun.digest(state);
     }
 
-    fun.update(state, uint8_array);
+    fun.progress(state, uint8_array);
 
     return state;
 }
